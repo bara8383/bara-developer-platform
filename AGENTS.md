@@ -2,13 +2,33 @@
 
 このファイルは、このリポジトリで作業する Codex 向けの永続的なプロジェクト指示です。リポジトリルートは Backstage ベースの internal developer platform 本体です。
 
+## 最初に読むこと
+
+作業前に必ず以下を読んでください。
+
+- `docs/backstage-customization-rules.md`
+- `README.md`
+- `package.json`
+
+## 重要な前提
+
+Backstage app はリポジトリルート直下にあります。
+
+Backstage 関連の実装では以下を基準にしてください。
+
+- app root: `.`
+- frontend app: `packages/app/`
+- backend app: `packages/backend/`
+- plugins: `plugins/`
+- config: `app-config*.yaml`
+
 ## ディレクトリ構成
 
-- `packages/app/`: Backstage frontend application です。
-- `packages/backend/`: Backstage backend です。
-- `plugins/`: プロジェクト固有の Backstage plugin を置く場所です。
+- `packages/app/`: Backstage frontend application です。frontend plugin/module 登録、route 追加、navigation 追加などの配線に限定してください。
+- `packages/backend/`: Backstage backend です。backend plugin/module 登録などの配線に限定してください。
+- `plugins/`: プロジェクト固有の Backstage plugin を置く場所です。新機能や IDP 独自の業務ロジックは原則ここに置いてください。
 - `examples/`: catalog entity や software template のサンプルです。
-- `docs/`: セットアップ、運用、知識メモなどのドキュメントです。
+- `docs/`: セットアップ、運用、知識メモ、AI コーディングルールなどのドキュメントです。
 - `app-config.yaml`: ローカル開発向けを含む基本設定です。
 - `app-config.production.yaml`: 本番向け設定です。変更時は本番影響を明示してください。
 
@@ -59,10 +79,36 @@ yarn test:e2e
 - ユーザーや他の作業者の変更を勝手に戻さないでください。
 - 変更は依頼された目的に絞り、無関係な整形やリファクタリングを混ぜないでください。
 - 既存の Backstage 構成と plugin pattern を優先してください。
-- frontend の画面やナビゲーションは基本的に `packages/app/` に置いてください。
-- backend plugin の追加や backend wiring は基本的に `packages/backend/` に置いてください。
+- Backstage 本体の直接改造を避けてください。
+- 新機能は原則 `plugins/` 配下に作ってください。
+- `packages/app/` は frontend plugin/module 登録、route 追加、navigation 追加などの配線に限定してください。
+- `packages/backend/` は backend plugin/module 登録などの配線に限定してください。
+- IDP 独自の業務ロジックを `packages/app/` や `packages/backend/` に直接書かないでください。
+- 外部 OSS Backstage plugin を将来的に取り込める構成を維持してください。
+- Backstage upgrade を困難にする変更を避けてください。
 - 新しい npm / Backstage 依存を追加する場合は、事前に目的、代替案、影響範囲を説明して確認してください。
 - `node_modules`、ビルド成果物、生成物は探索・編集対象にしないでください。ただし依存内部の調査を明示的に依頼された場合は例外です。
+
+## 作業前の確認
+
+実装前に、変更予定ファイルを確認してください。
+
+特に以下を変更する場合は注意してください。
+
+- `packages/app/**`
+- `packages/backend/**`
+- `package.json`
+- `app-config*.yaml`
+
+## ルール違反が必要な場合
+
+上記ルールに反する変更が必要な場合は、実装前に以下を説明してください。
+
+- なぜ必要か
+- `plugins/` に置けない理由
+- 代替案
+- Backstage upgrade への影響
+- 外部 OSS plugin 取り込みへの影響
 
 ## 設定と secret
 
