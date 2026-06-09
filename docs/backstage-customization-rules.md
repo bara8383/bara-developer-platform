@@ -11,6 +11,35 @@
 * 外部OSS Backstage pluginを将来的に取り込めるよう、Backstage標準構成を維持する
 * Backstage upgradeを困難にする変更を避ける
 
+## UI / Theme / Global CSS 変更ルール
+
+* Backstage全体の見た目変更は、原則として `plugins/` 配下のfrontend plugin/moduleとして実装する
+* `packages/app/` はfeature登録、route追加、plugin mountなど、Backstage appへ反映するための配線だけにする
+* Theme変更は、可能な限り `createUnifiedTheme`、theme token、`components.styleOverrides` に寄せる
+* `AppRootWrapperBlueprint` で注入するグローバルCSSは最小限にする
+* グローバルCSSで広範囲セレクタを使う場合は、理由、影響範囲、代替案をPR本文で説明する
+* 以下のような広範囲セレクタは、Backstage標準画面や外部pluginへ副作用が出やすいため原則避ける
+
+  * `[class*='MuiPaper-root']`
+  * `[class*='MuiCard-root']`
+  * `[class*='MuiInputBase-root']`
+  * `[class*='MuiTableContainer-root']`
+  * `[class*='Sidebar']`
+  * `button`
+  * `table`
+  * `input`
+  * `a`
+
+* UI / Theme / Global CSS変更では、Backstage標準画面、Catalog、TechDocs、将来追加する外部OSS Backstage pluginへの副作用を考慮する
+* UI変更時は、必要に応じて以下の検証コマンドを実行する
+
+  * `yarn tsc`
+  * `yarn lint:all`
+  * `yarn build:all`
+  * `yarn workspace app test --watch=false`
+
+* 可能ならCatalog、TechDocs、Search、Settingsなどの主要画面をローカル起動して目視確認する
+
 ## 変更してよい場所
 
 * `plugins/**`

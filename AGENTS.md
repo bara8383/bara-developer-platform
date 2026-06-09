@@ -86,6 +86,7 @@ yarn test:e2e
 - IDP 独自の業務ロジックを `packages/app/` や `packages/backend/` に直接書かないでください。
 - 外部 OSS Backstage plugin を将来的に取り込める構成を維持してください。
 - Backstage upgrade を困難にする変更を避けてください。
+- UI / theme / global CSS を変更する場合は、`docs/backstage-customization-rules.md` の「UI / Theme / Global CSS 変更ルール」に従ってください。
 - 新しい npm / Backstage 依存を追加する場合は、事前に目的、代替案、影響範囲を説明して確認してください。
 - `node_modules`、ビルド成果物、生成物は探索・編集対象にしないでください。ただし依存内部の調査を明示的に依頼された場合は例外です。
 
