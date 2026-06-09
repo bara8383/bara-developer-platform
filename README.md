@@ -8,3 +8,5 @@ To start the app, run:
 yarn install
 yarn start
 ```
+
+AIエージェントによるBackstageカスタマイズルールは、`AGENTS.md` と `docs/backstage-customization-rules.md` を参照してください。
