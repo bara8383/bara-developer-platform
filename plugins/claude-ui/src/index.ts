@@ -1,1 +1,0 @@
-export { claudeUiModule } from './theme';
