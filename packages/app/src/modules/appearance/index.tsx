@@ -107,6 +107,7 @@ const useStyles = makeStyles(theme => ({
     ':root': {
       '--bara-topbar-height': '58px',
       '--bara-sidebar-closed-width': '72px',
+      '--bara-sidebar-open-width': '224px',
       '--bara-claude-canvas': claudePalette.canvas,
       '--bara-claude-surface': claudePalette.surface,
       '--bara-claude-border': claudePalette.border,
@@ -177,7 +178,7 @@ const useStyles = makeStyles(theme => ({
     position: 'fixed',
     top: 0,
     right: 0,
-    left: 'var(--bara-sidebar-closed-width)',
+    left: 'var(--bara-sidebar-open-width)',
     height: 'var(--bara-topbar-height)',
     zIndex: theme.zIndex.appBar - 1,
     display: 'flex',
@@ -189,6 +190,9 @@ const useStyles = makeStyles(theme => ({
     backdropFilter: 'blur(18px)',
     borderBottom: `1px solid ${claudePalette.border}`,
     boxShadow: '0 8px 24px rgba(47, 42, 37, 0.08)',
+    [theme.breakpoints.down('xs')]: {
+      left: 0,
+    },
   },
   productMark: {
     display: 'flex',
