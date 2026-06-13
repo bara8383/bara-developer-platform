@@ -1,0 +1,87 @@
+---
+# Project PoC:
+# - Represent a Bara Project as a Backstage System so the current Catalog can load it
+#   without a custom processor.
+# - If System starts to distort the domain model, introduce a custom Project kind later.
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: payment-platform
+  title: Payment Platform
+  description: Example project managed declaratively by Git YAML and Backstage Catalog
+  annotations:
+    bara.dev/project-kind: project
+    bara.dev/template-ref: template:default/web-app-ecs-rds
+  tags:
+    - bara-project
+    - payment
+  links:
+    - url: https://example.com/bara/templates/web-app-ecs-rds
+      title: web-app-ecs-rds template reference
+      icon: docs
+spec:
+  owner: group:default/guests
+  domain: payments
+---
+# Environment PoC:
+# - Represent each Bara Environment as a Backstage Resource attached to the project System.
+# - If Resource starts to distort the domain model, introduce a custom Environment kind later.
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: payment-platform-dev
+  title: Payment Platform Dev
+  description: Development environment for the payment-platform project
+  annotations:
+    bara.dev/environment-kind: environment
+    bara.dev/project-ref: system:default/payment-platform
+    bara.dev/template-ref: template:default/web-app-ecs-rds
+    bara.dev/deploy-stage: dev
+  tags:
+    - bara-environment
+    - dev
+spec:
+  type: environment
+  owner: group:default/guests
+  system: payment-platform
+  lifecycle: experimental
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: payment-platform-stg
+  title: Payment Platform Staging
+  description: Staging environment for the payment-platform project
+  annotations:
+    bara.dev/environment-kind: environment
+    bara.dev/project-ref: system:default/payment-platform
+    bara.dev/template-ref: template:default/web-app-ecs-rds
+    bara.dev/deploy-stage: stg
+  tags:
+    - bara-environment
+    - staging
+spec:
+  type: environment
+  owner: group:default/guests
+  system: payment-platform
+  lifecycle: pre-production
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: payment-platform-prod
+  title: Payment Platform Production
+  description: Production environment for the payment-platform project
+  annotations:
+    bara.dev/environment-kind: environment
+    bara.dev/project-ref: system:default/payment-platform
+    bara.dev/template-ref: template:default/web-app-ecs-rds
+    bara.dev/deploy-stage: prod
+  tags:
+    - bara-environment
+    - production
+spec:
+  type: environment
+  owner: group:default/guests
+  system: payment-platform
+  lifecycle: production
