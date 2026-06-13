@@ -115,6 +115,12 @@ catalog:
       rules:
         - allow: [Template]
 
+    # Local Project / Environment PoC data
+    - type: file
+      target: ../../examples/idp-projects/location.yaml
+      rules:
+        - allow: [Location]
+
     # Local example organizational data
     - type: file
       target: ../../examples/org.yaml

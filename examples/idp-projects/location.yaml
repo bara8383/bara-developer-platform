@@ -1,0 +1,11 @@
+---
+# Registers the Project / Environment PoC entities for the local catalog.
+# The target is relative to this Location file.
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: idp-project-environments
+  description: Local Project / Environment catalog examples for Bara Developer Platform
+spec:
+  targets:
+    - ./payment-platform.yaml
