@@ -7,9 +7,9 @@ Backstage の生成アプリを土台にしつつ、IDP 独自機能はできる
 
 ## 最重要方針
 
-- Backstage 本体を直接作り替えるのではなく、原則として Backstage の plugin / module / extension / configuration として拡張する。
+- Backstage 本体を直接作り替えるのではなく、原則として Backstage の plugin / module / extension / configuration として拡張する。詳細は`docs/how-to-develop.md`
 - 新しい IDP 独自機能は、まず `plugins/` 配下に閉じ込めることを検討する。
-- `packages/app` と `packages/backend` は、基本的に Backstage アプリ本体の配線層として扱う。
+- `packages/app` と `packages/backend` は、基本的に Backstage アプリ本体の配線、登録、合成場所として扱う。
 - `packages/app` や `packages/backend` を変更する場合は、plugin / module の登録、app-level extension、設定接続など、必要最小限の変更にする。
 - 独自の業務ロジック、画面ロジック、ドメイン処理を `packages/app` や `packages/backend` に直接増やさない。
 - OSS plugin 追加、Backstage バージョンアップ、将来の移行を妨げる hard fork 的変更を避ける。
