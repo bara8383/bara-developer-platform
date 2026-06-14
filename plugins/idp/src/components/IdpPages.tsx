@@ -1,4 +1,4 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { Link, Route, Routes, useParams } from 'react-router-dom';
 import {
   Content,
@@ -14,15 +14,63 @@ import {
   CardContent,
   Chip,
   Grid,
+  MenuItem,
+  TextField,
   Typography,
 } from '@material-ui/core';
 import CloudQueueIcon from '@material-ui/icons/CloudQueue';
+import { idpApi } from '../api/localIdpApi';
 import {
-  environments,
-  operationLogs,
-  projects,
-  templates,
-} from '../data/mockData';
+  IdpEnvironment,
+  IdpOperationLog,
+  IdpProject,
+  IdpTemplate,
+  IdpTemplateExecution,
+} from '../types';
+
+const useIdpData = () => {
+  const [projects, setProjects] = useState<IdpProject[]>([]);
+  const [environments, setEnvironments] = useState<IdpEnvironment[]>([]);
+  const [templates, setTemplates] = useState<IdpTemplate[]>([]);
+  const [operationLogs, setOperationLogs] = useState<IdpOperationLog[]>([]);
+  const [executions, setExecutions] = useState<IdpTemplateExecution[]>([]);
+
+  const refresh = async () => {
+    const [
+      nextProjects,
+      nextEnvironments,
+      nextTemplates,
+      nextLogs,
+      nextExecutions,
+    ] = await Promise.all([
+      idpApi.listProjects(),
+      idpApi.listEnvironments(),
+      idpApi.listTemplates(),
+      idpApi.listOperationLogs(),
+      idpApi.listTemplateExecutions(),
+    ]);
+    setProjects(nextProjects);
+    setEnvironments(nextEnvironments);
+    setTemplates(nextTemplates);
+    setOperationLogs(nextLogs);
+    setExecutions(nextExecutions);
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  return {
+    projects,
+    environments,
+    templates,
+    operationLogs,
+    executions,
+    refresh,
+  };
+};
+
+type IdpDataProps = ReturnType<typeof useIdpData>;
 
 type StatusChipProps = { status?: string };
 export const StatusChip = ({ status = 'unknown' }: StatusChipProps) => {
@@ -89,9 +137,11 @@ export const SummaryCard = ({
   </Card>
 );
 export const OperationLogList = ({
+  operationLogs,
   projectId,
   environmentId,
 }: {
+  operationLogs: IdpOperationLog[];
   projectId?: string;
   environmentId?: string;
 }) => (
@@ -114,11 +164,17 @@ export const OperationLogList = ({
   />
 );
 
-const projectName = (id: string) => projects.find(p => p.id === id)?.name ?? id;
-const templateName = (id: string) =>
+const projectName = (projects: IdpProject[], id: string) =>
+  projects.find(p => p.id === id)?.name ?? id;
+const templateName = (templates: IdpTemplate[], id: string) =>
   templates.find(t => t.id === id)?.name ?? id;
 
-export const IdpDashboardPage = () => (
+export const IdpDashboardPage = ({
+  projects,
+  environments,
+  templates,
+  operationLogs,
+}: IdpDataProps) => (
   <>
     <Header
       title="Bara IDP Dashboard"
@@ -168,14 +224,14 @@ export const IdpDashboardPage = () => (
           </SectionCard>
         </Grid>
         <Grid item xs={12}>
-          <OperationLogList />
+          <OperationLogList operationLogs={operationLogs} />
         </Grid>
       </Grid>
     </Content>
   </>
 );
 
-export const ProjectListPage = () => (
+export const ProjectListPage = ({ projects }: IdpDataProps) => (
   <>
     <Header
       title="Projects"
@@ -202,7 +258,12 @@ export const ProjectListPage = () => (
   </>
 );
 
-export const ProjectDetailPage = () => {
+export const ProjectDetailPage = ({
+  projects,
+  environments,
+  templates,
+  operationLogs,
+}: IdpDataProps) => {
   const { projectId } = useParams();
   const p = projects.find(x => x.id === projectId);
   if (!p) return <EmptyState title="Project not found" />;
@@ -253,7 +314,9 @@ export const ProjectDetailPage = () => {
             <SectionCard title="Available Templates">
               {p.templateIds.map(id => (
                 <Box key={id}>
-                  <Link to={`/idp/templates/${id}`}>{templateName(id)}</Link>
+                  <Link to={`/idp/templates/${id}`}>
+                    {templateName(templates, id)}
+                  </Link>
                 </Box>
               ))}
             </SectionCard>
@@ -268,7 +331,7 @@ export const ProjectDetailPage = () => {
             </SectionCard>
           </Grid>
           <Grid item xs={12}>
-            <OperationLogList projectId={p.id} />
+            <OperationLogList operationLogs={operationLogs} projectId={p.id} />
           </Grid>
         </Grid>
       </Content>
@@ -276,7 +339,10 @@ export const ProjectDetailPage = () => {
   );
 };
 
-export const EnvironmentListPage = () => (
+export const EnvironmentListPage = ({
+  projects,
+  environments,
+}: IdpDataProps) => (
   <>
     <Header
       title="Environments"
@@ -290,7 +356,7 @@ export const EnvironmentListPage = () => (
             title: 'Environment',
             render: e => <Link to={`/idp/environments/${e.id}`}>{e.name}</Link>,
           },
-          { title: 'Project', render: e => projectName(e.projectId) },
+          { title: 'Project', render: e => projectName(projects, e.projectId) },
           { title: 'Type', field: 'type' },
           { title: 'AWS Account', field: 'awsAccountId' },
           { title: 'Region', field: 'region' },
@@ -314,7 +380,11 @@ export const EnvironmentListPage = () => (
   </>
 );
 
-export const EnvironmentDetailPage = () => {
+export const EnvironmentDetailPage = ({
+  projects,
+  environments,
+  operationLogs,
+}: IdpDataProps) => {
   const { environmentId } = useParams();
   const e = environments.find(x => x.id === environmentId);
   if (!e) return <EmptyState title="Environment not found" />;
@@ -350,7 +420,7 @@ export const EnvironmentDetailPage = () => {
           <Grid item xs={12} md={6}>
             <SectionCard title="Project">
               <Link to={`/idp/projects/${e.projectId}`}>
-                {projectName(e.projectId)}
+                {projectName(projects, e.projectId)}
               </Link>
             </SectionCard>
           </Grid>
@@ -377,7 +447,11 @@ export const EnvironmentDetailPage = () => {
             </SectionCard>
           </Grid>
           <Grid item xs={12}>
-            <OperationLogList projectId={e.projectId} environmentId={e.id} />
+            <OperationLogList
+              operationLogs={operationLogs}
+              projectId={e.projectId}
+              environmentId={e.id}
+            />
           </Grid>
         </Grid>
       </Content>
@@ -385,7 +459,7 @@ export const EnvironmentDetailPage = () => {
   );
 };
 
-export const TemplateListPage = () => (
+export const TemplateListPage = ({ templates }: IdpDataProps) => (
   <>
     <Header
       title="Templates"
@@ -415,7 +489,7 @@ export const TemplateListPage = () => (
   </>
 );
 
-export const TemplateDetailPage = () => {
+export const TemplateDetailPage = ({ templates }: IdpDataProps) => {
   const { templateId } = useParams();
   const t = templates.find(x => x.id === templateId);
   if (!t) return <EmptyState title="Template not found" />;
@@ -480,66 +554,243 @@ export const TemplateDetailPage = () => {
   );
 };
 
-export const TemplateRunPage = () => {
+export const TemplateRunPage = ({
+  projects,
+  environments,
+  templates,
+  refresh,
+}: IdpDataProps) => {
   const { templateId } = useParams();
   const t = templates.find(x => x.id === templateId);
+  const [step, setStep] = useState<'input' | 'confirm' | 'result'>('input');
+  const [projectId, setProjectId] = useState('');
+  const [environmentId, setEnvironmentId] = useState('');
+  const [requestedBy, setRequestedBy] = useState(
+    'user:default/local-developer',
+  );
+  const [parameters, setParameters] = useState<Record<string, string>>({});
+  const [execution, setExecution] = useState<IdpTemplateExecution>();
+
+  const filteredEnvironments = useMemo(
+    () =>
+      projectId
+        ? environments.filter(
+            environment => environment.projectId === projectId,
+          )
+        : environments,
+    [environments, projectId],
+  );
+
   if (!t) return <EmptyState title="Template not found" />;
-  const steps = [
-    'Template confirmation',
-    'Select or create Project',
-    'Select or create Environment',
-    'Template parameters',
-    'Confirmation',
-    'Mock execution result',
-  ];
+
+  const updateParameter = (name: string, value: string) => {
+    setParameters(current => ({ ...current, [name]: value }));
+  };
+
+  const execute = async () => {
+    const nextExecution = await idpApi.executeTemplate({
+      templateId: t.id,
+      projectId: projectId || undefined,
+      environmentId: environmentId || undefined,
+      parameters,
+      requestedBy,
+    });
+    setExecution(nextExecution);
+    await refresh();
+    setStep('result');
+  };
+
   return (
     <>
       <Header
         title={`Run ${t.name}`}
-        subtitle="Mock flow only; no backend, GitHub, AWS, Catalog, or Scaffolder calls are made"
+        subtitle="Local IDP API client creates an execution record. Scaffolder, GitHub, AWS, and Catalog side effects are intentionally not implemented yet."
       />
       <Content>
         <Grid container spacing={3}>
-          {steps.map((s, i) => (
-            <Grid item xs={12} md={6} key={s}>
-              <SectionCard title={`${i + 1}. ${s}`}>
-                <Typography>
-                  {i === 5
-                    ? 'Future execution will run Scaffolder actions, create GitHub repositories, generate catalog-info.yaml, register Catalog Entities, provision AWS resources, create application skeletons, and save execution / deployment / operation logs to the IDP DB.'
-                    : 'Mock input section for future backend-driven execution.'}
-                </Typography>
+          <Grid item xs={12} md={4}>
+            <SectionCard title="Execution state">
+              <StatusChip status={step} />
+              <Typography variant="body2">
+                This is a replaceable frontend API boundary backed by an
+                in-memory local adapter for now.
+              </Typography>
+            </SectionCard>
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <SectionCard title="Not implemented integrations">
+              <Typography>
+                TODO: backend plugin persistence, Scaffolder task creation,
+                GitHub repository changes, AWS provisioning, and Catalog
+                registration are not called by this local implementation.
+              </Typography>
+            </SectionCard>
+          </Grid>
+
+          {step === 'input' && (
+            <Grid item xs={12}>
+              <SectionCard title="1. Input">
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      select
+                      fullWidth
+                      required
+                      label="Project"
+                      value={projectId}
+                      onChange={event => {
+                        setProjectId(event.target.value);
+                        setEnvironmentId('');
+                      }}
+                    >
+                      {projects.map(project => (
+                        <MenuItem key={project.id} value={project.id}>
+                          {project.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      select
+                      fullWidth
+                      label="Environment"
+                      value={environmentId}
+                      onChange={event => setEnvironmentId(event.target.value)}
+                    >
+                      {filteredEnvironments.map(environment => (
+                        <MenuItem key={environment.id} value={environment.id}>
+                          {environment.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <TextField
+                      fullWidth
+                      required
+                      label="Requested by"
+                      value={requestedBy}
+                      onChange={event => setRequestedBy(event.target.value)}
+                    />
+                  </Grid>
+                  {t.parameters.map(parameter => (
+                    <Grid item xs={12} md={6} key={parameter.name}>
+                      <TextField
+                        fullWidth
+                        required={parameter.required}
+                        label={parameter.label}
+                        helperText={parameter.description}
+                        value={
+                          parameters[parameter.name] ??
+                          String(parameter.defaultValue ?? '')
+                        }
+                        onChange={event =>
+                          updateParameter(parameter.name, event.target.value)
+                        }
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+                <Box mt={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={!projectId || !requestedBy}
+                    onClick={() => setStep('confirm')}
+                  >
+                    Confirm inputs
+                  </Button>
+                </Box>
               </SectionCard>
             </Grid>
-          ))}
-          <Grid item xs={12}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<CloudQueueIcon />}
-            >
-              Show mock success result
-            </Button>
-          </Grid>
+          )}
+
+          {step === 'confirm' && (
+            <Grid item xs={12}>
+              <SectionCard title="2. Confirmation">
+                <Typography>Template: {t.name}</Typography>
+                <Typography>
+                  Project: {projectName(projects, projectId)}
+                </Typography>
+                <Typography>
+                  Environment: {environmentId || 'not selected'}
+                </Typography>
+                <Typography>Requested by: {requestedBy}</Typography>
+                <pre>{JSON.stringify(parameters, null, 2)}</pre>
+                <Button onClick={() => setStep('input')}>Back</Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<CloudQueueIcon />}
+                  onClick={execute}
+                >
+                  Create TemplateExecution
+                </Button>
+              </SectionCard>
+            </Grid>
+          )}
+
+          {step === 'result' && execution && (
+            <Grid item xs={12}>
+              <SectionCard title="3. Execution result">
+                <Typography>Execution ID: {execution.id}</Typography>
+                <Typography>
+                  Status: <StatusChip status={execution.status} />
+                </Typography>
+                <Typography>
+                  Project: {projectName(projects, execution.projectId ?? '')}
+                </Typography>
+                <Typography>
+                  Environment: {execution.environmentId ?? 'not selected'}
+                </Typography>
+                <Typography>Created: {execution.createdAt}</Typography>
+                <Typography>
+                  Result varies by input: serviceName containing "fail" returns
+                  failed; all other values return succeeded.
+                </Typography>
+                <pre>{JSON.stringify(execution.parameters, null, 2)}</pre>
+                <Button component={Link} to="/idp/templates" color="primary">
+                  Back to templates
+                </Button>
+              </SectionCard>
+            </Grid>
+          )}
         </Grid>
       </Content>
     </>
   );
 };
 
-export const IdpRoot = () => (
-  <Page themeId="tool">
-    <Routes>
-      <Route index element={<IdpDashboardPage />} />
-      <Route path="projects" element={<ProjectListPage />} />
-      <Route path="projects/:projectId" element={<ProjectDetailPage />} />
-      <Route path="environments" element={<EnvironmentListPage />} />
-      <Route
-        path="environments/:environmentId"
-        element={<EnvironmentDetailPage />}
-      />
-      <Route path="templates" element={<TemplateListPage />} />
-      <Route path="templates/:templateId" element={<TemplateDetailPage />} />
-      <Route path="templates/:templateId/run" element={<TemplateRunPage />} />
-    </Routes>
-  </Page>
-);
+export const IdpRoot = () => {
+  const data = useIdpData();
+  return (
+    <Page themeId="tool">
+      <Routes>
+        <Route index element={<IdpDashboardPage {...data} />} />
+        <Route path="projects" element={<ProjectListPage {...data} />} />
+        <Route
+          path="projects/:projectId"
+          element={<ProjectDetailPage {...data} />}
+        />
+        <Route
+          path="environments"
+          element={<EnvironmentListPage {...data} />}
+        />
+        <Route
+          path="environments/:environmentId"
+          element={<EnvironmentDetailPage {...data} />}
+        />
+        <Route path="templates" element={<TemplateListPage {...data} />} />
+        <Route
+          path="templates/:templateId"
+          element={<TemplateDetailPage {...data} />}
+        />
+        <Route
+          path="templates/:templateId/run"
+          element={<TemplateRunPage {...data} />}
+        />
+      </Routes>
+    </Page>
+  );
+};
