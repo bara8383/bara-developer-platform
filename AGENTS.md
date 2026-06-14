@@ -25,3 +25,25 @@ Backstage の生成アプリを土台にしつつ、IDP 独自機能はできる
 - `docs/`: セットアップ、運用、設計メモ、AI コーディングルール、Backstage カスタマイズ方針などのドキュメント。
 - `app-config.yaml`: ローカル開発・共通設定。
 - `app-config.production.yaml`: 本番向け設定。変更時は本番影響を明示する。
+
+## 変更後の品質確認・起動確認
+
+コードを変更した場合は、作業完了前に必ず品質確認と起動確認を行う。
+
+以下のコマンドは、必ずプロジェクトルートで実行する。
+
+```bash
+# 依存関係の整合性確認
+yarn install --immutable
+
+# フォーマット確認
+yarn prettier:check
+
+# lint確認
+yarn lint:all
+
+# 型チェック
+yarn tsc:full
+
+# app / backend の起動確認
+yarn start
