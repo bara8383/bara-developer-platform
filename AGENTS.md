@@ -47,3 +47,4 @@ yarn tsc:full
 
 # app / backend の起動確認
 yarn start
+```
