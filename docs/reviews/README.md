@@ -18,12 +18,19 @@
 
 - [2026-06-16 AI-native developer control plane 再レビュー v2](./2026-06-16-product-review-v2-ai-native-control-plane.md)
 
+## Follow-up decisions
+
+- [AI-native control plane charter](../product/ai-native-control-plane-charter.md)
+- [AI action approval model](../architecture/ai-action-approval-model.md)
+- [Intent / Plan / Run lifecycle](../architecture/intent-plan-run-lifecycle.md)
+- [ADR 0002: AI action approval boundary](../adr/0002-ai-action-approval-boundary.md)
+
 ## 過去レビュー一覧
 
-| 日付       | Version | レビュー                                                                                                  | 関連 ADR                                                                      |
-| ---------- | ------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 2026-06-16 | v2      | [AI-native developer control plane 再レビュー](./2026-06-16-product-review-v2-ai-native-control-plane.md) | [ADR 0001](../adr/0001-idp-management-source-of-truth.md)、ADR 0002-0004 候補 |
-| 2026-06-16 | v1      | [製品レビューと改善提案](./2026-06-16-product-review-v1.md)                                               | [ADR 0001](../adr/0001-idp-management-source-of-truth.md)                     |
+| 日付       | Version | レビュー                                                                                                  | 関連 ADR                                                                                                                              |
+| ---------- | ------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-16 | v2      | [AI-native developer control plane 再レビュー](./2026-06-16-product-review-v2-ai-native-control-plane.md) | [ADR 0001](../adr/0001-idp-management-source-of-truth.md)、[ADR 0002](../adr/0002-ai-action-approval-boundary.md)、ADR 0003-0004 候補 |
+| 2026-06-16 | v1      | [製品レビューと改善提案](./2026-06-16-product-review-v1.md)                                               | [ADR 0001](../adr/0001-idp-management-source-of-truth.md)                                                                             |
 
 ## 命名規則
 
