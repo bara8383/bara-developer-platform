@@ -32,6 +32,12 @@ Completion output:
 3. Validation commands to run from the repository root
 4. Risks, limitations, or follow-up decisions needed
 
+Artifact handoff:
+- Return the completion output as complete Markdown that the parent agent can persist without rewriting.
+- Include a title, creation date, agent name, and accepted scope at the top.
+- Write the artifact's headings, body text, and metadata in Japanese. Keep code, commands, file paths, API names, and identifiers unchanged.
+- Do not choose an output sequence number or overwrite an existing artifact; the parent agent owns persistence under docs/ai/output/implementer/.
+
 Hard constraints:
 - Do not implement unaccepted options.
 - Do not make large architectural direction changes without explicit human approval.

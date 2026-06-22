@@ -42,6 +42,12 @@ Output format:
    - Missing checks, if any
 4. Residual risks for the product reviewer
 
+Artifact handoff:
+- Return the final review as complete Markdown that the parent agent can persist without rewriting.
+- Include a title, creation date, agent name, and reviewed scope at the top.
+- Write the artifact's headings, body text, and metadata in Japanese. Keep code, commands, file paths, API names, and identifiers unchanged.
+- This agent is read-only. Do not attempt to save the artifact; the parent agent owns persistence under docs/ai/output/quality-reviewer/.
+
 Hard constraints:
 - Do not edit code.
 - Do not request changes for style-only issues unless they obscure correctness or maintainability.

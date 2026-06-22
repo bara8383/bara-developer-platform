@@ -122,6 +122,49 @@ Responsibilities:
 
 Avoid spawning multiple agents for the same responsibility at the same time unless their inputs and scopes are clearly different.
 
+## How to invoke agents
+
+Codex does not spawn subagents automatically. Ask for the agent explicitly in the prompt. The custom agent name is the `name` value in each `.codex/agents/*.toml` file.
+
+After adding or changing an agent definition, start a new Codex session so the project-scoped configuration is loaded.
+
+During a CLI session, use `/agent` to inspect or switch to a spawned agent thread. The parent agent should wait for the requested agents and consolidate their results.
+
+Example:
+
+```text
+Use the improvement-proposer subagent to inspect the current repository and propose improvements.
+Do not implement anything. Wait for it to finish, save its final report using the repository output convention, and summarize the saved path.
+```
+
+## Persisting agent outputs
+
+The parent agent persists each subagent's final Markdown report. This is required because read-only agents cannot write files themselves.
+
+Output path:
+
+```text
+docs/ai/output/<agent-name>/NNN-<descriptive-kebab-case-name>.md
+```
+
+Rules:
+
+- Use the custom agent `name`, not its display nickname, as the directory name.
+- Number files independently for each agent, starting at `001`.
+- Inspect existing files and use the next number; never overwrite an earlier report.
+- Store the final decision-ready report, not raw exploration logs or full command output.
+- Include a title, creation date, agent name, and request or scope at the top.
+- Write headings, body text, and metadata in Japanese. Preserve code, commands, file paths, API names, and other identifiers in their original form.
+
+Examples:
+
+```text
+docs/ai/output/improvement-proposer/001-catalog-improvement-options.md
+docs/ai/output/implementer/001-adopted-catalog-changes.md
+docs/ai/output/quality-reviewer/001-catalog-change-quality-review.md
+docs/ai/output/product-review-packager/001-catalog-change-review-guide.md
+```
+
 ## Prompt examples
 
 ### Example 1: propose improvements
@@ -132,6 +175,7 @@ Analyze the current repository state, recent changes, and known product directio
 Do not implement anything.
 Return improvement proposals as A/B/C options with impact, cost, risk, and decision points.
 Wait for my decision.
+Save the final report according to the repository output convention.
 ```
 
 ### Example 2: implement accepted options only
@@ -144,6 +188,7 @@ Implement only the options I explicitly accepted:
 Do not implement rejected or deferred options.
 Keep changes minimal.
 After implementation, summarize changed files and validation commands.
+Save the final report according to the repository output convention.
 ```
 
 ### Example 3: quality review
@@ -154,6 +199,7 @@ Review the latest implementation before human product review.
 Focus on security, bugs, regressions, tests, maintainability, unintended behavior, and performance.
 Do not edit code.
 Return findings by severity with evidence and recommended fixes.
+Save the final report according to the repository output convention.
 ```
 
 ### Example 4: package for human review
@@ -163,6 +209,7 @@ Spawn product-review-packager.
 Prepare a review package for a human product reviewer.
 Include what changed, where to look, how to verify, known issues, screenshots/URLs if available, and decision points.
 Do not edit code.
+Save the final report according to the repository output convention.
 ```
 
 ## Notes and guardrails
